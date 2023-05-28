@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();// to create routes
 const User = require("../models/User"); // import user schema from database
 const { body, validationResult } = require("express-validator"); // used in body of request
-var bcrypt = require("bcryptjs"); 
+var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
+const passport = require("passport");
 
 const dotenv = require('dotenv');
-dotenv.config(); 
+dotenv.config();
 let fetchuser = require("../middleware/fetchuser");
+require("../config/passport-google-oauth2-strategy");
 
 const secret = process.env.SECRET_KEY;
 
@@ -62,7 +64,7 @@ router.post(
 
       var authtoken = jwt.sign(data, secret);
       success = true;
-      res.send({ success, authtoken ,name:req.body.name });
+      res.send({ success, authtoken, name: req.body.name });
       //end of jwt use
     } catch (error) {
       console.log(error.message);
@@ -112,7 +114,7 @@ router.post(
       };
       var authtoken = jwt.sign(data, secret);
       success = true;
-      res.json({ success, authtoken ,name:user.name});
+      res.json({ success, authtoken, name: user.name });
       //end of jwt use
     } catch (error) {
       console.log(error.message);
@@ -136,5 +138,70 @@ router.post("/getuser", fetchuser, async (req, res) => {
     res.status(500).send("Internal server error has occured");
   }
 });
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+/* This code is creating a route for handling the callback URL after a user has successfully
+authenticated with their Google account. It uses the `passport.authenticate` middleware with the
+"google" strategy to handle the authentication process. If the authentication is successful, the
+user is redirected to the "http://localhost:3000" URL. If the authentication fails, the user is
+redirected to the "/login/failed" URL. */
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    successRedirect: "http://localhost:3000",
+    failureRedirect: "/login/failed",
+  })
+);
+
+/* This code creates a route for handling the case when a user fails to authenticate during the login
+process. It sends a JSON response with a status code of 401 (Unauthorized) and an error message
+indicating that the user failed to authenticate. */
+router.get("/login/failed", (req, res) => {
+  res.status(401).json({ error: true, message: "User failed to authenticate." });
+});
+
+
+router.get("/login/success", (req, res) => {
+  if (req.user) {
+
+    const data = {
+      user: {
+        id: req.user.id,
+      },
+    };
+
+    res.status(200).json({
+      success: true,
+      error: false,
+      message: "Successfully Loged In",
+      user: req.user,
+      accessToken: jwt.sign(data, secret),
+
+    });
+
+
+
+  } else {
+    res.status(403).json({ error: true, message: "Not Authorized" });
+  }
+});
+
+
+router.get("/logout", (req, res) => {
+  req.logout(function (err) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    return res.redirect("http://localhost:3000");
+  });
+
+})
 
 module.exports = router;

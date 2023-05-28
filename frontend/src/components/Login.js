@@ -5,11 +5,14 @@ function Login(props) {
   const location = useLocation();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [guestLoginClicked, setGuestLoginClicked] = useState(false);
+  const[googleLogin,setGogleLogin]=useState(false);
   let history = useNavigate();
 
   const onchange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
+
+  
 
   useEffect(() => {
     if (guestLoginClicked) {
@@ -32,6 +35,8 @@ function Login(props) {
         password: credentials.password,
       }),
     });
+
+   
     const json = await response.json();
     console.log(json);
     if (json.success) {
@@ -43,6 +48,44 @@ function Login(props) {
       props.showAlert("Invalid Credentials", "danger");
     }
   };
+
+
+useEffect(() => {
+  const getUser = async () => {
+    await fetch("login/success", {
+      method: "GET",
+      credentials: "include",
+      header: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Credentials": true,
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          return res.json();
+        }
+        throw new Error("authentication has been failed");
+        
+      })
+      .then((resObject) => {
+        
+          console.log(resObject.accessToken);
+        localStorage.setItem("token", resObject.accessToken);
+      localStorage.setItem("name", resObject.user.name);
+      localStorage.setItem("googleLogin", true)
+      history("/");
+      props.showAlert("Logged in successfully", "success");
+        
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  getUser();
+}, []);
+
+
 
   return (
     <div>
@@ -91,8 +134,14 @@ function Login(props) {
         <button className="btn btn-secondary" onClick={handleGuestLogin}>
           Login as guest
         </button>
+        <a 
+        href="http://localhost:5000/auth/google" 
+        onClick={() =>{setGogleLogin(true)}} >
+          <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google Login" style={{width: 55, height :55, padding:10 }} />
+          </a>
+
       </div>
-      <br />
+      <br/>
       <p className="text-center last-para">
         Don't have an account?{" "}
         <Link

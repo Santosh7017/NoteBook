@@ -85,6 +85,7 @@ function SignUp(props) {
                 <p className='text-center last-para'>Already have an account?  <Link to="/login" className={`nav-link ${location.pathname === "/login" ? "active" : ""}`} >Login</Link>
  </p>
             </form>
+            
         </>
     )
 }

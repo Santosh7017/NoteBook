@@ -5,6 +5,10 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const handleLogout = () => {
+    if(localStorage.getItem("googleLogin")){
+      localStorage.removeItem("googleLogin");
+      window.location.href = "http://localhost:5000/logout";
+    }
     localStorage.removeItem("token");
     navigate("/login");
   };

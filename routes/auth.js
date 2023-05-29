@@ -141,13 +141,14 @@ router.post("/getuser", fetchuser, async (req, res) => {
 
 
 
-/* This code is creating a route for handling the callback URL after a user has successfully
-authenticated with their Google account. It uses the `passport.authenticate` middleware with the
-"google" strategy to handle the authentication process. If the authentication is successful, the
-user is redirected to the "http://localhost:3000" URL. If the authentication fails, the user is
-redirected to the "/login/failed" URL. */
 
 
+
+/* This code creates a route for initiating the Google OAuth2 authentication process. When a user
+navigates to this route, it generates a URL for the Google OAuth2 authentication page with the
+required parameters such as response_type, redirect_uri, scope, and client_id. It then sends a JSON
+response with the generated URL to the client, which can be used to redirect the user to the Google
+authentication page. */
 router.get('/auth/google', (req, res) => {
   const googleAuthURL = 'https://accounts.google.com/o/oauth2/v2/auth';
 
@@ -215,9 +216,7 @@ router.get("/logout", (req, res) => {
       console.log(err);
       return;
     }
-    return res.status(200).json({
-      success: true,
-    });
+    res.json({ success: true });
   });
 
 })

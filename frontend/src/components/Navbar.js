@@ -7,7 +7,12 @@ function Navbar() {
   const handleLogout = () => {
     if(localStorage.getItem("googleLogin")){
       localStorage.removeItem("googleLogin");
-      window.location.href = "http://localhost:5000/logout";
+      const response = fetch("/logout");
+      const { success } = response.json();
+      if (success) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
     }
     localStorage.removeItem("token");
     navigate("/login");

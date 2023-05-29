@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import axios from "axios";
 
 function Login(props) {
   const location = useLocation();
@@ -87,6 +88,20 @@ useEffect(() => {
 
 
 
+const handleGoogleLogin = async () => {
+  try {
+    setGogleLogin(true);
+    const response = await fetch('/auth/google');
+    const { url } = await response.json();
+    
+    window.location.href = url;
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+
+
   return (
     <div>
       <div className="text-center my-4">
@@ -134,12 +149,12 @@ useEffect(() => {
         <button className="btn btn-secondary" onClick={handleGuestLogin}>
           Login as guest
         </button>
-        <a 
+        {/* <a 
         href="http://localhost:5000/auth/google" 
         onClick={() =>{setGogleLogin(true)}} >
           <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google Login" style={{width: 55, height :55, padding:10 }} />
-          </a>
-
+          </a> */}
+<img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" onClick={handleGoogleLogin} alt="Google Login" style={{width: 55, height :55, padding:10, cursor:"pointer" }} />
       </div>
       <br/>
       <p className="text-center last-para">

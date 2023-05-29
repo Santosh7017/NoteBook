@@ -139,25 +139,41 @@ router.post("/getuser", fetchuser, async (req, res) => {
   }
 });
 
-router.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
+
 
 /* This code is creating a route for handling the callback URL after a user has successfully
 authenticated with their Google account. It uses the `passport.authenticate` middleware with the
 "google" strategy to handle the authentication process. If the authentication is successful, the
 user is redirected to the "http://localhost:3000" URL. If the authentication fails, the user is
 redirected to the "/login/failed" URL. */
+
+
+router.get('/auth/google', (req, res) => {
+  const googleAuthURL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    redirect_uri: process.env.CALLBACK_URL, // Replace with your redirect URI
+    scope: 'profile email',
+    client_id: process.env.CLIENT_ID, // Replace with your client ID
+  });
+
+  const redirectURL = `${googleAuthURL}?${params}`;
+
+  res.json({ url: redirectURL });
+});
+
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    successRedirect: "http://localhost:3000",
+    successRedirect: process.env.successURL,
     failureRedirect: "/login/failed",
   })
 );
+
+
+
+
 
 /* This code creates a route for handling the case when a user fails to authenticate during the login
 process. It sends a JSON response with a status code of 401 (Unauthorized) and an error message
@@ -199,7 +215,9 @@ router.get("/logout", (req, res) => {
       console.log(err);
       return;
     }
-    return res.redirect("http://localhost:3000");
+    return res.status(200).json({
+      success: true,
+    });
   });
 
 })
